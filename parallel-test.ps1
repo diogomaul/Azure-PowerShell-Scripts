@@ -13,23 +13,18 @@ function getMcCainADUsers {
 }
 
 function getMcCainSubscriptions {
-    $subscriptions =  Get-AzSubscription #-SubscriptionId 6b5fafad-c388-4834-8e16-daf9828deb84   
-    return $subscriptions 
+    $Subscriptions =  Get-AzSubscription #-SubscriptionId 6b5fafad-c388-4834-8e16-daf9828deb84   
+    return $Subscriptions 
 }
 
-function getMcCainRBAC {
-
-    param (
-        $subscriptions,
-        $ADUsers
-    )
+function getMcCainRBAC($subscriptions, $ADUsers) {
     
     $stopwatch =  [system.diagnostics.stopwatch]::StartNew()
     $roles = @()
 
     foreach ($subscription in $subscriptions) {
 
-        Select-AzSubscription -SubscriptionID $subscription.Name
+        Select-AzSubscription -Subscription @Subscription
 
         $ADUsers | ForEach-Object -Parallel{
             $roles = Get-AzRoleAssignment -SignInName $_.UserPrincipalName -ExpandPrincipalGroups -WarningAction SilentlyContinue | Select-Object DisplayName, RoleDefinitionName, Scope
@@ -60,16 +55,15 @@ function getMcCainRBAC {
             }
         } -ThrottleLimit 50
     }
-
     $stopwatch
     $stopwatch.Stop()
 }
 
 Import-Module Az
-Import-Module AzureAD -UseWindowsPowerShel
+Import-Module AzureAD -UseWindowsPowerShell
 Connect-AzAccount -AccountId "admdimaul@mccain.com"
 Connect-AzureAD -AccountId "admdimaul@mccain.com" 
 
-$ADUsers = getMcCainADUsers
-$subscriptions = getMcCainSubscriptions 
-getMcCainRBAC -subscriptions $subscriptions -ADUsers $ADUsers
+getMcCainADUsers
+getMcCainRBAC
+getMcCainSubscriptions $subscriptions, $ADUsers

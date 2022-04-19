@@ -1,0 +1,7 @@
+# Exclude all excel, csv, text and log files
+*.csv
+*.xls
+*.xlsx
+*.txt
+*.log
+
